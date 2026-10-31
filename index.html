@@ -796,5 +796,65 @@
   </footer>
 
 </div>
+
+<script>
+(function () {
+  // The field reorganises itself every five seconds: the dots drift to new places,
+  // the links fade out and are redrawn between the new neighbours.
+  var svg = document.querySelector('svg.field');
+  if (!svg || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var dots = Array.prototype.slice.call(svg.querySelectorAll('.field-dots circle'));
+  if (dots.length < 10) return;
+  var W = 900, H = 520, cx = W / 2, cy = H / 2, MOVE = 2200, STEP = 5000, started = false;
+  var pts = dots.map(function (c) { return [parseFloat(c.getAttribute('cx')), parseFloat(c.getAttribute('cy'))]; });
+  var links = svg.querySelector('.field-lines');
+  function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function drift(p) {
+    for (var k = 0; k < 8; k++) {
+      var x = p[0] + gauss() * 34, y = p[1] + gauss() * 22;
+      var r = Math.hypot((x - cx) / 1.45, (y - cy) / 0.8);
+      if (x > 20 && x < W - 20 && y > 16 && y < H - 16 && r > 70 && r < 300) return [x, y];
+    }
+    return p;
+  }
+  function drawLinks(ps) {
+    var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('stroke', '#141414'); g.setAttribute('stroke-opacity', '0.26');
+    g.setAttribute('stroke-width', '0.8'); g.setAttribute('fill', 'none');
+    g.style.opacity = '0'; g.style.transition = 'opacity 1.2s ease';
+    var seen = {};
+    for (var i = 0; i < ps.length; i++) {
+      var near = [];
+      for (var j = 0; j < ps.length; j++) if (j !== i) near.push([Math.hypot(ps[i][0] - ps[j][0], ps[i][1] - ps[j][1]), j]);
+      near.sort(function (a, b) { return a[0] - b[0]; });
+      for (var k = 0; k < 3 && k < near.length; k++) {
+        if (near[k][0] >= 62) break;
+        var j2 = near[k][1], key = i < j2 ? i + '-' + j2 : j2 + '-' + i;
+        if (seen[key]) continue; seen[key] = 1;
+        var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        l.setAttribute('x1', ps[i][0].toFixed(1)); l.setAttribute('y1', ps[i][1].toFixed(1));
+        l.setAttribute('x2', ps[j2][0].toFixed(1)); l.setAttribute('y2', ps[j2][1].toFixed(1));
+        g.appendChild(l);
+      }
+    }
+    svg.insertBefore(g, svg.firstChild);
+    return g;
+  }
+  function tick() {
+    if (document.hidden) return;
+    if (!started) { started = true; dots.forEach(function (c) { c.style.transition = 'cx ' + MOVE + 'ms ease-in-out, cy ' + MOVE + 'ms ease-in-out'; }); }
+    var old = links;
+    old.style.transition = 'opacity 0.8s ease'; old.style.opacity = '0';
+    pts = pts.map(drift);
+    dots.forEach(function (c, i) { c.setAttribute('cx', pts[i][0].toFixed(1)); c.setAttribute('cy', pts[i][1].toFixed(1)); });
+    setTimeout(function () {
+      if (old.parentNode) old.parentNode.removeChild(old);
+      links = drawLinks(pts);
+      requestAnimationFrame(function () { requestAnimationFrame(function () { links.style.opacity = '1'; }); });
+    }, MOVE);
+  }
+  setTimeout(function () { tick(); setInterval(tick, STEP); }, 4500);
+})();
+</script>
 </body>
 </html>
