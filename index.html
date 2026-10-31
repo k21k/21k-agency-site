@@ -3,32 +3,853 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>21K Reception</title>
-<meta name="description" content="21K Reception is the assistant application operated by 21K.">
+<title>21K, a society of agents</title>
+<meta name="description" content="Notes on agents, agencies and societies, written while building a small organisation of machines and being the one person in it.">
+<meta property="og:title" content="21K, a society of agents">
+<meta property="og:description" content="Notes on agents, agencies and societies, written while building a small organisation of machines and being the one person in it.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://21k.agency/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&display=swap" rel="stylesheet">
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 720px; margin: 0 auto; padding: 48px 20px; line-height: 1.6; color: #1a1a1a; background: #ffffff; }
-  h1 { font-size: 2rem; margin-bottom: 0.25rem; }
-  .sub { color: #555; margin-top: 0; }
-  a { color: #1a56db; }
-  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 0.9rem; color: #555; }
+  :root {
+    --paper: #ffffff;
+    --ink: #141414;
+    --ink-soft: #5f6368;
+    --hair: #e4e4e4;
+    --red: #d23f2a;
+    --measure: 34rem;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--paper); }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--hair); transition: border-color .2s ease; }
+  a:hover, a:focus-visible { border-bottom-color: var(--ink); }
+  a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  .page { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+  header.top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 1.6rem 0 0;
+    font-size: 1rem;
+  }
+  header.top .mark { font-weight: 500; letter-spacing: 0.02em; border: 0; }
+  header.top nav a { border: 0; margin-left: 1.4rem; color: var(--ink-soft); }
+  header.top nav a:hover { color: var(--ink); }
+
+  /* Hero: the drawing first, then the title */
+  .hero { padding: 2.5rem 0 1rem; }
+  .field { display: block; width: 100%; height: auto; max-height: 62vh; }
+  .field-dots circle { opacity: 0; animation: appear .9s ease forwards; animation-delay: var(--d, 0ms); }
+  .field-lines { opacity: 0; animation: appear 1.4s ease forwards; animation-delay: 1.5s; }
+  @keyframes appear { to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .field-dots circle, .field-lines { animation: none; opacity: 1; }
+  }
+  .hero h1 {
+    font-size: clamp(2.1rem, 5vw, 3.6rem);
+    line-height: 1.08;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin: 1.6rem 0 0.9rem;
+    max-width: 22ch;
+  }
+  .hero p.lede { font-size: 1.3rem; line-height: 1.5; max-width: var(--measure); margin: 0 0 0.6rem; }
+  .hero p.whisper { color: var(--ink-soft); font-size: 1rem; margin: 0; }
+
+  /* Leaves: one idea per leaf, numbered because they are read in order */
+  .leaves { margin-top: 3.5rem; border-top: 1px solid var(--hair); }
+  .leaf {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 2rem 3rem;
+    padding: 3.4rem 0;
+    border-bottom: 1px solid var(--hair);
+    align-items: start;
+  }
+  .leaf .figure { width: 7rem; }
+  .leaf .figure svg { width: 100%; height: auto; display: block; }
+  .leaf .figure .n { display: block; margin-top: .6rem; color: var(--ink-soft); font-size: .95rem; font-variant-numeric: tabular-nums; }
+  .leaf h2 { font-size: 1.75rem; font-weight: 400; line-height: 1.2; margin: -0.3rem 0 .8rem; max-width: 26ch; }
+  .leaf p { max-width: var(--measure); margin: 0 0 1rem; }
+  .leaf p:last-child { margin-bottom: 0; }
+
+  .invite { padding: 4rem 0 2rem; }
+  .invite h2 { font-size: 1.75rem; font-weight: 400; margin: 0 0 1.2rem; }
+  .invite ol { list-style: none; padding: 0; margin: 0; max-width: var(--measure); counter-reset: q; }
+  .invite li { counter-increment: q; padding: .9rem 0; border-top: 1px solid var(--hair); display: grid; grid-template-columns: 2.4rem 1fr; }
+  .invite li::before { content: counter(q); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .invite li:last-child { border-bottom: 1px solid var(--hair); }
+  .invite p.after { max-width: var(--measure); color: var(--ink-soft); margin-top: 1.4rem; }
+
+  footer {
+    margin-top: 4rem;
+    padding: 1.6rem 0 2.6rem;
+    border-top: 1px solid var(--hair);
+    color: var(--ink-soft);
+    font-size: .95rem;
+    display: flex; flex-wrap: wrap; gap: .4rem 1.6rem; align-items: center;
+  }
+  footer a { border-bottom-color: transparent; }
+  footer a:hover { border-bottom-color: var(--ink-soft); }
+  footer .seal { display: inline-block; width: .75rem; height: .75rem; margin-right: .35rem; vertical-align: -1px; }
+
+  @media (max-width: 640px) {
+    body { font-size: 1.0625rem; }
+    .hero { padding-top: 1.6rem; }
+    .field { max-height: 44vh; }
+    .leaf { grid-template-columns: 1fr; gap: 1rem; padding: 2.6rem 0; }
+    .leaf .figure { width: 5rem; display: flex; align-items: center; gap: .8rem; }
+    .leaf .figure .n { margin: 0; }
+    header.top nav a { margin-left: 1rem; }
+  }
 </style>
 </head>
 <body>
-  <h1>21K Reception</h1>
-  <p class="sub">An assistant application operated by 21K (21k.agency).</p>
+<div class="page">
 
-  <h2>What it does</h2>
-  <p>21K Reception helps the 21K team manage day-to-day communication and scheduling. With your permission, it connects to your Google account to read and organise email, check and arrange calendar events, and find relevant documents, so that requests are routed and answered promptly.</p>
+  <header class="top">
+    <a class="mark" href="/">21K</a>
+    <nav aria-label="Sections">
+      <a href="#notes">Notes</a>
+      <a href="#questions">Questions</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
 
-  <h2>How it uses your Google data</h2>
-  <p>21K Reception only accesses the Google data you explicitly authorise on the Google consent screen, and only to provide the features described above. It does not sell your data or use it for advertising. Full details are in our <a href="/privacy.html">Privacy Policy</a>.</p>
+  <section class="hero" aria-labelledby="title">
+    <svg class="field" viewBox="0 0 900 520" role="img" aria-label="A network of small dots joined by faint lines.">
+      <g class="field-lines" stroke="#141414" stroke-opacity="0.26" stroke-width="0.8" fill="none">
+<line x1="322.5" y1="400.6" x2="297.0" y2="380.3"/>
+<line x1="322.5" y1="400.6" x2="333.8" y2="377.2"/>
+<line x1="322.5" y1="400.6" x2="309.1" y2="396.3"/>
+<line x1="729.8" y1="335.5" x2="697.1" y2="316.2"/>
+<line x1="729.8" y1="335.5" x2="757.4" y2="284.8"/>
+<line x1="255.9" y1="235.4" x2="282.4" y2="241.3"/>
+<line x1="255.9" y1="235.4" x2="258.4" y2="247.8"/>
+<line x1="255.9" y1="235.4" x2="238.0" y2="217.5"/>
+<line x1="255.9" y1="235.4" x2="282.2" y2="223.1"/>
+<line x1="212.2" y1="253.9" x2="217.6" y2="220.3"/>
+<line x1="212.2" y1="253.9" x2="176.0" y2="274.3"/>
+<line x1="212.2" y1="253.9" x2="238.0" y2="217.5"/>
+<line x1="634.5" y1="284.4" x2="643.5" y2="328.4"/>
+<line x1="634.5" y1="284.4" x2="655.8" y2="280.9"/>
+<line x1="634.5" y1="284.4" x2="653.0" y2="279.9"/>
+<line x1="634.5" y1="284.4" x2="654.0" y2="270.1"/>
+<line x1="643.5" y1="328.4" x2="697.1" y2="316.2"/>
+<line x1="643.5" y1="328.4" x2="615.2" y2="327.5"/>
+<line x1="643.5" y1="328.4" x2="626.9" y2="333.0"/>
+<line x1="239.6" y1="319.6" x2="258.9" y2="319.6"/>
+<line x1="239.6" y1="319.6" x2="253.2" y2="286.6"/>
+<line x1="239.6" y1="319.6" x2="253.8" y2="320.4"/>
+<line x1="239.6" y1="319.6" x2="187.1" y2="339.0"/>
+<line x1="480.3" y1="358.6" x2="470.9" y2="338.2"/>
+<line x1="480.3" y1="358.6" x2="487.7" y2="401.8"/>
+<line x1="480.3" y1="358.6" x2="451.8" y2="367.3"/>
+<line x1="480.3" y1="358.6" x2="463.4" y2="385.9"/>
+<line x1="229.6" y1="134.6" x2="175.7" y2="158.0"/>
+<line x1="229.6" y1="134.6" x2="229.9" y2="99.0"/>
+<line x1="229.6" y1="134.6" x2="258.7" y2="168.1"/>
+<line x1="229.6" y1="134.6" x2="215.0" y2="181.7"/>
+<line x1="303.6" y1="321.3" x2="292.4" y2="335.9"/>
+<line x1="303.6" y1="321.3" x2="304.5" y2="307.3"/>
+<line x1="303.6" y1="321.3" x2="303.8" y2="324.7"/>
+<line x1="814.4" y1="229.8" x2="775.3" y2="252.2"/>
+<line x1="814.4" y1="229.8" x2="809.5" y2="241.2"/>
+<line x1="385.2" y1="400.6" x2="404.5" y2="373.7"/>
+<line x1="385.2" y1="400.6" x2="333.8" y2="377.2"/>
+<line x1="615.3" y1="376.4" x2="600.4" y2="347.6"/>
+<line x1="615.3" y1="376.4" x2="575.6" y2="372.8"/>
+<line x1="615.3" y1="376.4" x2="672.1" y2="385.7"/>
+<line x1="615.3" y1="376.4" x2="644.8" y2="400.7"/>
+<line x1="556.4" y1="126.9" x2="559.6" y2="130.0"/>
+<line x1="556.4" y1="126.9" x2="521.3" y2="138.0"/>
+<line x1="556.4" y1="126.9" x2="504.6" y2="139.9"/>
+<line x1="556.4" y1="126.9" x2="574.5" y2="74.7"/>
+<line x1="499.9" y1="319.2" x2="499.0" y2="297.7"/>
+<line x1="499.9" y1="319.2" x2="470.9" y2="338.2"/>
+<line x1="499.9" y1="319.2" x2="476.6" y2="318.8"/>
+<line x1="337.6" y1="324.1" x2="338.1" y2="353.8"/>
+<line x1="337.6" y1="324.1" x2="343.6" y2="325.2"/>
+<line x1="337.6" y1="324.1" x2="345.5" y2="338.9"/>
+<line x1="337.6" y1="324.1" x2="379.9" y2="310.7"/>
+<line x1="217.6" y1="220.3" x2="215.0" y2="181.7"/>
+<line x1="217.6" y1="220.3" x2="238.0" y2="217.5"/>
+<line x1="217.6" y1="220.3" x2="238.4" y2="212.3"/>
+<line x1="512.4" y1="381.1" x2="487.7" y2="401.8"/>
+<line x1="512.4" y1="381.1" x2="531.8" y2="389.8"/>
+<line x1="512.4" y1="381.1" x2="542.9" y2="374.6"/>
+<line x1="384.2" y1="182.4" x2="392.0" y2="158.3"/>
+<line x1="384.2" y1="182.4" x2="399.7" y2="189.3"/>
+<line x1="384.2" y1="182.4" x2="357.2" y2="216.3"/>
+<line x1="384.2" y1="182.4" x2="374.6" y2="149.4"/>
+<line x1="237.0" y1="190.0" x2="266.2" y2="196.4"/>
+<line x1="237.0" y1="190.0" x2="290.7" y2="161.2"/>
+<line x1="237.0" y1="190.0" x2="258.7" y2="168.1"/>
+<line x1="237.0" y1="190.0" x2="215.0" y2="181.7"/>
+<line x1="237.0" y1="190.0" x2="238.0" y2="217.5"/>
+<line x1="237.0" y1="190.0" x2="238.4" y2="212.3"/>
+<line x1="283.6" y1="287.8" x2="278.7" y2="266.6"/>
+<line x1="283.6" y1="287.8" x2="253.2" y2="286.6"/>
+<line x1="283.6" y1="287.8" x2="304.5" y2="307.3"/>
+<line x1="283.6" y1="287.8" x2="270.3" y2="281.5"/>
+<line x1="283.6" y1="287.8" x2="281.6" y2="275.6"/>
+<line x1="283.6" y1="287.8" x2="327.2" y2="280.9"/>
+<line x1="339.0" y1="75.4" x2="351.7" y2="116.4"/>
+<line x1="339.0" y1="75.4" x2="339.1" y2="74.8"/>
+<line x1="454.8" y1="332.0" x2="470.9" y2="338.2"/>
+<line x1="454.8" y1="332.0" x2="476.6" y2="318.8"/>
+<line x1="454.8" y1="332.0" x2="439.4" y2="359.5"/>
+<line x1="454.8" y1="332.0" x2="444.9" y2="306.3"/>
+<line x1="572.9" y1="192.3" x2="570.3" y2="194.0"/>
+<line x1="572.9" y1="192.3" x2="578.7" y2="177.8"/>
+<line x1="572.9" y1="192.3" x2="576.8" y2="229.0"/>
+<line x1="428.8" y1="169.8" x2="399.7" y2="189.3"/>
+<line x1="428.8" y1="169.8" x2="450.1" y2="167.3"/>
+<line x1="428.8" y1="169.8" x2="426.5" y2="177.7"/>
+<line x1="258.9" y1="319.6" x2="253.2" y2="286.6"/>
+<line x1="258.9" y1="319.6" x2="253.8" y2="320.4"/>
+<line x1="278.7" y1="266.6" x2="249.7" y2="278.1"/>
+<line x1="278.7" y1="266.6" x2="270.3" y2="281.5"/>
+<line x1="278.7" y1="266.6" x2="282.4" y2="241.3"/>
+<line x1="278.7" y1="266.6" x2="281.6" y2="275.6"/>
+<line x1="278.7" y1="266.6" x2="258.4" y2="247.8"/>
+<line x1="596.3" y1="280.3" x2="579.0" y2="285.1"/>
+<line x1="596.3" y1="280.3" x2="607.3" y2="243.9"/>
+<line x1="596.3" y1="280.3" x2="584.3" y2="296.7"/>
+<line x1="360.9" y1="235.7" x2="388.1" y2="241.3"/>
+<line x1="360.9" y1="235.7" x2="321.6" y2="253.1"/>
+<line x1="360.9" y1="235.7" x2="357.2" y2="216.3"/>
+<line x1="570.3" y1="194.0" x2="578.7" y2="177.8"/>
+<line x1="570.3" y1="194.0" x2="576.8" y2="229.0"/>
+<line x1="175.7" y1="158.0" x2="215.0" y2="181.7"/>
+<line x1="388.1" y1="241.3" x2="410.8" y2="268.1"/>
+<line x1="388.1" y1="241.3" x2="357.2" y2="216.3"/>
+<line x1="693.5" y1="211.3" x2="681.9" y2="242.6"/>
+<line x1="693.5" y1="211.3" x2="712.9" y2="155.0"/>
+<line x1="693.5" y1="211.3" x2="651.0" y2="189.6"/>
+<line x1="693.5" y1="211.3" x2="652.0" y2="183.6"/>
+<line x1="249.7" y1="278.1" x2="253.2" y2="286.6"/>
+<line x1="249.7" y1="278.1" x2="270.3" y2="281.5"/>
+<line x1="392.0" y1="158.3" x2="399.7" y2="189.3"/>
+<line x1="392.0" y1="158.3" x2="374.6" y2="149.4"/>
+<line x1="404.5" y1="373.7" x2="447.7" y2="371.3"/>
+<line x1="404.5" y1="373.7" x2="439.4" y2="359.5"/>
+<line x1="292.4" y1="335.9" x2="304.5" y2="307.3"/>
+<line x1="292.4" y1="335.9" x2="303.8" y2="324.7"/>
+<line x1="253.2" y1="286.6" x2="253.8" y2="320.4"/>
+<line x1="253.2" y1="286.6" x2="270.3" y2="281.5"/>
+<line x1="567.3" y1="374.3" x2="550.2" y2="370.6"/>
+<line x1="567.3" y1="374.3" x2="575.6" y2="372.8"/>
+<line x1="567.3" y1="374.3" x2="576.8" y2="357.9"/>
+<line x1="567.3" y1="374.3" x2="565.0" y2="370.5"/>
+<line x1="477.0" y1="130.6" x2="521.3" y2="138.0"/>
+<line x1="477.0" y1="130.6" x2="450.1" y2="167.3"/>
+<line x1="477.0" y1="130.6" x2="504.6" y2="139.9"/>
+<line x1="600.4" y1="347.6" x2="576.8" y2="357.9"/>
+<line x1="600.4" y1="347.6" x2="615.2" y2="327.5"/>
+<line x1="600.4" y1="347.6" x2="626.9" y2="333.0"/>
+<line x1="600.4" y1="347.6" x2="586.1" y2="332.0"/>
+<line x1="655.2" y1="141.6" x2="635.2" y2="168.1"/>
+<line x1="655.2" y1="141.6" x2="650.1" y2="179.3"/>
+<line x1="655.2" y1="141.6" x2="611.3" y2="141.7"/>
+<line x1="655.2" y1="141.6" x2="712.9" y2="155.0"/>
+<line x1="655.2" y1="141.6" x2="652.0" y2="183.6"/>
+<line x1="556.6" y1="292.6" x2="579.0" y2="285.1"/>
+<line x1="556.6" y1="292.6" x2="557.1" y2="294.8"/>
+<line x1="556.6" y1="292.6" x2="584.3" y2="296.7"/>
+<line x1="635.2" y1="168.1" x2="650.1" y2="179.3"/>
+<line x1="635.2" y1="168.1" x2="612.8" y2="169.4"/>
+<line x1="635.2" y1="168.1" x2="611.3" y2="141.7"/>
+<line x1="635.2" y1="168.1" x2="651.0" y2="189.6"/>
+<line x1="635.2" y1="168.1" x2="652.0" y2="183.6"/>
+<line x1="559.6" y1="130.0" x2="578.7" y2="177.8"/>
+<line x1="559.6" y1="130.0" x2="521.3" y2="138.0"/>
+<line x1="559.6" y1="130.0" x2="574.5" y2="74.7"/>
+<line x1="304.5" y1="307.3" x2="303.8" y2="324.7"/>
+<line x1="304.5" y1="307.3" x2="327.2" y2="280.9"/>
+<line x1="218.1" y1="417.1" x2="234.0" y2="396.6"/>
+<line x1="499.0" y1="297.7" x2="488.7" y2="254.0"/>
+<line x1="499.0" y1="297.7" x2="476.6" y2="318.8"/>
+<line x1="550.2" y1="370.6" x2="565.0" y2="370.5"/>
+<line x1="550.2" y1="370.6" x2="531.8" y2="389.8"/>
+<line x1="550.2" y1="370.6" x2="534.5" y2="344.8"/>
+<line x1="550.2" y1="370.6" x2="542.9" y2="374.6"/>
+<line x1="176.0" y1="274.3" x2="156.5" y2="331.5"/>
+<line x1="176.0" y1="274.3" x2="150.5" y2="235.4"/>
+<line x1="266.2" y1="196.4" x2="290.7" y2="161.2"/>
+<line x1="266.2" y1="196.4" x2="258.7" y2="168.1"/>
+<line x1="266.2" y1="196.4" x2="282.2" y2="223.1"/>
+<line x1="424.7" y1="275.0" x2="437.8" y2="265.2"/>
+<line x1="424.7" y1="275.0" x2="439.4" y2="251.1"/>
+<line x1="424.7" y1="275.0" x2="410.8" y2="268.1"/>
+<line x1="424.7" y1="275.0" x2="444.9" y2="306.3"/>
+<line x1="399.7" y1="189.3" x2="426.5" y2="177.7"/>
+<line x1="321.6" y1="253.1" x2="282.4" y2="241.3"/>
+<line x1="321.6" y1="253.1" x2="327.2" y2="280.9"/>
+<line x1="579.0" y1="285.1" x2="557.1" y2="294.8"/>
+<line x1="579.0" y1="285.1" x2="584.3" y2="296.7"/>
+<line x1="650.1" y1="179.3" x2="651.0" y2="189.6"/>
+<line x1="650.1" y1="179.3" x2="652.0" y2="183.6"/>
+<line x1="467.2" y1="229.5" x2="471.8" y2="194.9"/>
+<line x1="467.2" y1="229.5" x2="445.0" y2="216.4"/>
+<line x1="467.2" y1="229.5" x2="488.7" y2="254.0"/>
+<line x1="467.2" y1="229.5" x2="505.1" y2="212.4"/>
+<line x1="467.2" y1="229.5" x2="464.0" y2="222.5"/>
+<line x1="290.7" y1="161.2" x2="258.7" y2="168.1"/>
+<line x1="697.1" y1="316.2" x2="655.8" y2="280.9"/>
+<line x1="575.6" y1="372.8" x2="576.8" y2="357.9"/>
+<line x1="575.6" y1="372.8" x2="565.0" y2="370.5"/>
+<line x1="332.5" y1="362.1" x2="338.1" y2="353.8"/>
+<line x1="332.5" y1="362.1" x2="333.8" y2="377.2"/>
+<line x1="332.5" y1="362.1" x2="345.5" y2="338.9"/>
+<line x1="576.8" y1="357.9" x2="563.6" y2="342.5"/>
+<line x1="576.8" y1="357.9" x2="565.0" y2="370.5"/>
+<line x1="576.8" y1="357.9" x2="586.1" y2="332.0"/>
+<line x1="615.2" y1="327.5" x2="626.9" y2="333.0"/>
+<line x1="612.8" y1="169.4" x2="578.7" y2="177.8"/>
+<line x1="612.8" y1="169.4" x2="611.3" y2="141.7"/>
+<line x1="297.0" y1="380.3" x2="333.8" y2="377.2"/>
+<line x1="297.0" y1="380.3" x2="309.1" y2="396.3"/>
+<line x1="775.3" y1="252.2" x2="757.4" y2="284.8"/>
+<line x1="775.3" y1="252.2" x2="809.5" y2="241.2"/>
+<line x1="775.3" y1="252.2" x2="727.8" y2="248.5"/>
+<line x1="270.3" y1="281.5" x2="281.6" y2="275.6"/>
+<line x1="338.1" y1="353.8" x2="343.6" y2="325.2"/>
+<line x1="338.1" y1="353.8" x2="333.8" y2="377.2"/>
+<line x1="338.1" y1="353.8" x2="345.5" y2="338.9"/>
+<line x1="643.7" y1="431.8" x2="672.1" y2="385.7"/>
+<line x1="643.7" y1="431.8" x2="644.8" y2="400.7"/>
+<line x1="757.4" y1="284.8" x2="727.8" y2="248.5"/>
+<line x1="563.6" y1="342.5" x2="534.5" y2="344.8"/>
+<line x1="563.6" y1="342.5" x2="556.9" y2="328.8"/>
+<line x1="563.6" y1="342.5" x2="586.1" y2="332.0"/>
+<line x1="147.6" y1="213.6" x2="150.5" y2="235.4"/>
+<line x1="147.6" y1="213.6" x2="114.3" y2="187.3"/>
+<line x1="681.9" y1="242.6" x2="727.8" y2="248.5"/>
+<line x1="681.9" y1="242.6" x2="654.0" y2="270.1"/>
+<line x1="681.9" y1="242.6" x2="682.3" y2="263.2"/>
+<line x1="343.6" y1="325.2" x2="345.5" y2="338.9"/>
+<line x1="343.6" y1="325.2" x2="379.9" y2="310.7"/>
+<line x1="565.0" y1="370.5" x2="542.9" y2="374.6"/>
+<line x1="471.8" y1="194.9" x2="445.0" y2="216.4"/>
+<line x1="471.8" y1="194.9" x2="505.1" y2="212.4"/>
+<line x1="471.8" y1="194.9" x2="464.0" y2="222.5"/>
+<line x1="471.8" y1="194.9" x2="450.1" y2="167.3"/>
+<line x1="333.8" y1="377.2" x2="309.1" y2="396.3"/>
+<line x1="445.0" y1="216.4" x2="464.0" y2="222.5"/>
+<line x1="470.9" y1="338.2" x2="476.6" y2="318.8"/>
+<line x1="655.8" y1="280.9" x2="653.0" y2="279.9"/>
+<line x1="655.8" y1="280.9" x2="654.0" y2="270.1"/>
+<line x1="655.8" y1="280.9" x2="682.3" y2="263.2"/>
+<line x1="653.0" y1="279.9" x2="654.0" y2="270.1"/>
+<line x1="351.7" y1="116.4" x2="374.6" y2="149.4"/>
+<line x1="351.7" y1="116.4" x2="339.1" y2="74.8"/>
+<line x1="488.7" y1="254.0" x2="505.1" y2="212.4"/>
+<line x1="488.7" y1="254.0" x2="464.0" y2="222.5"/>
+<line x1="488.7" y1="254.0" x2="526.1" y2="228.3"/>
+<line x1="623.2" y1="232.2" x2="607.3" y2="243.9"/>
+<line x1="623.2" y1="232.2" x2="576.8" y2="229.0"/>
+<line x1="623.2" y1="232.2" x2="635.4" y2="220.6"/>
+<line x1="487.7" y1="401.8" x2="463.4" y2="385.9"/>
+<line x1="531.8" y1="389.8" x2="542.9" y2="374.6"/>
+<line x1="505.1" y1="212.4" x2="526.1" y2="228.3"/>
+<line x1="521.3" y1="138.0" x2="504.6" y2="139.9"/>
+<line x1="557.1" y1="294.8" x2="584.3" y2="296.7"/>
+<line x1="450.1" y1="167.3" x2="426.5" y2="177.7"/>
+<line x1="437.8" y1="265.2" x2="439.4" y2="251.1"/>
+<line x1="437.8" y1="265.2" x2="410.8" y2="268.1"/>
+<line x1="174.4" y1="368.5" x2="156.5" y2="331.5"/>
+<line x1="174.4" y1="368.5" x2="187.1" y2="339.0"/>
+<line x1="534.5" y1="344.8" x2="556.9" y2="328.8"/>
+<line x1="672.1" y1="385.7" x2="644.8" y2="400.7"/>
+<line x1="439.4" y1="251.1" x2="410.8" y2="268.1"/>
+<line x1="345.5" y1="338.9" x2="379.9" y2="310.7"/>
+<line x1="654.0" y1="270.1" x2="682.3" y2="263.2"/>
+<line x1="607.3" y1="243.9" x2="576.8" y2="229.0"/>
+<line x1="607.3" y1="243.9" x2="635.4" y2="220.6"/>
+<line x1="576.8" y1="229.0" x2="526.1" y2="228.3"/>
+<line x1="156.5" y1="331.5" x2="187.1" y2="339.0"/>
+<line x1="476.6" y1="318.8" x2="444.9" y2="306.3"/>
+<line x1="447.7" y1="371.3" x2="439.4" y2="359.5"/>
+<line x1="447.7" y1="371.3" x2="451.8" y2="367.3"/>
+<line x1="447.7" y1="371.3" x2="463.4" y2="385.9"/>
+<line x1="215.0" y1="181.7" x2="238.4" y2="212.3"/>
+<line x1="439.4" y1="359.5" x2="451.8" y2="367.3"/>
+<line x1="651.0" y1="189.6" x2="652.0" y2="183.6"/>
+<line x1="651.0" y1="189.6" x2="635.4" y2="220.6"/>
+<line x1="282.4" y1="241.3" x2="258.4" y2="247.8"/>
+<line x1="282.4" y1="241.3" x2="282.2" y2="223.1"/>
+<line x1="150.5" y1="235.4" x2="97.7" y2="250.6"/>
+<line x1="150.5" y1="235.4" x2="114.3" y2="187.3"/>
+<line x1="238.0" y1="217.5" x2="238.4" y2="212.3"/>
+<line x1="451.8" y1="367.3" x2="463.4" y2="385.9"/>
+<line x1="556.9" y1="328.8" x2="586.1" y2="332.0"/>
+</g><g class="field-dots" fill="#141414">
+<circle cx="322.5" cy="400.6" r="1.9" style="--d:0ms"/>
+<circle cx="729.8" cy="335.5" r="2.2" style="--d:38ms"/>
+<circle cx="255.9" cy="235.4" r="1.9" style="--d:76ms"/>
+<circle cx="212.2" cy="253.9" r="2.2" style="--d:114ms"/>
+<circle cx="634.5" cy="284.4" r="1.9" style="--d:152ms"/>
+<circle cx="643.5" cy="328.4" r="2.6" style="--d:190ms"/>
+<circle cx="239.6" cy="319.6" r="1.9" style="--d:228ms"/>
+<circle cx="480.3" cy="358.6" r="1.6" style="--d:266ms"/>
+<circle cx="229.6" cy="134.6" r="2.6" style="--d:304ms"/>
+<circle cx="303.6" cy="321.3" r="2.6" style="--d:342ms"/>
+<circle cx="814.4" cy="229.8" r="1.9" style="--d:380ms"/>
+<circle cx="385.2" cy="400.6" r="1.9" style="--d:418ms"/>
+<circle cx="615.3" cy="376.4" r="1.9" style="--d:456ms"/>
+<circle cx="556.4" cy="126.9" r="2.6" style="--d:494ms"/>
+<circle cx="499.9" cy="319.2" r="2.6" style="--d:532ms"/>
+<circle cx="337.6" cy="324.1" r="2.2" style="--d:570ms"/>
+<circle cx="217.6" cy="220.3" r="2.6" style="--d:608ms"/>
+<circle cx="512.4" cy="381.1" r="1.9" style="--d:646ms"/>
+<circle cx="384.2" cy="182.4" r="2.2" style="--d:684ms"/>
+<circle cx="237.0" cy="190.0" r="2.2" style="--d:722ms"/>
+<circle cx="283.6" cy="287.8" r="1.6" style="--d:760ms"/>
+<circle cx="339.0" cy="75.4" r="2.2" style="--d:798ms"/>
+<circle cx="454.8" cy="332.0" r="1.6" style="--d:836ms"/>
+<circle cx="572.9" cy="192.3" r="2.2" style="--d:874ms"/>
+<circle cx="428.8" cy="169.8" r="2.6" style="--d:912ms"/>
+<circle cx="770.3" cy="422.0" r="2.6" style="--d:950ms"/>
+<circle cx="258.9" cy="319.6" r="1.6" style="--d:988ms"/>
+<circle cx="278.7" cy="266.6" r="2.6" style="--d:1026ms"/>
+<circle cx="596.3" cy="280.3" r="2.2" style="--d:1064ms"/>
+<circle cx="360.9" cy="235.7" r="2.2" style="--d:1102ms"/>
+<circle cx="570.3" cy="194.0" r="1.6" style="--d:1140ms"/>
+<circle cx="175.7" cy="158.0" r="1.6" style="--d:1178ms"/>
+<circle cx="388.1" cy="241.3" r="1.9" style="--d:1216ms"/>
+<circle cx="693.5" cy="211.3" r="1.6" style="--d:1254ms"/>
+<circle cx="249.7" cy="278.1" r="1.6" style="--d:1292ms"/>
+<circle cx="392.0" cy="158.3" r="2.2" style="--d:1330ms"/>
+<circle cx="229.9" cy="99.0" r="2.2" style="--d:1368ms"/>
+<circle cx="404.5" cy="373.7" r="1.6" style="--d:0ms"/>
+<circle cx="292.4" cy="335.9" r="1.9" style="--d:38ms"/>
+<circle cx="253.2" cy="286.6" r="2.2" style="--d:76ms"/>
+<circle cx="567.3" cy="374.3" r="1.9" style="--d:114ms"/>
+<circle cx="477.0" cy="130.6" r="2.6" style="--d:152ms"/>
+<circle cx="600.4" cy="347.6" r="2.2" style="--d:190ms"/>
+<circle cx="655.2" cy="141.6" r="2.6" style="--d:228ms"/>
+<circle cx="556.6" cy="292.6" r="1.9" style="--d:266ms"/>
+<circle cx="635.2" cy="168.1" r="2.6" style="--d:304ms"/>
+<circle cx="559.6" cy="130.0" r="2.2" style="--d:342ms"/>
+<circle cx="304.5" cy="307.3" r="1.6" style="--d:380ms"/>
+<circle cx="218.1" cy="417.1" r="2.2" style="--d:418ms"/>
+<circle cx="499.0" cy="297.7" r="1.6" style="--d:456ms"/>
+<circle cx="550.2" cy="370.6" r="1.9" style="--d:494ms"/>
+<circle cx="176.0" cy="274.3" r="2.6" style="--d:532ms"/>
+<circle cx="266.2" cy="196.4" r="1.6" style="--d:570ms"/>
+<circle cx="253.8" cy="320.4" r="2.2" style="--d:608ms"/>
+<circle cx="424.7" cy="275.0" r="1.6" style="--d:646ms"/>
+<circle cx="399.7" cy="189.3" r="1.6" style="--d:684ms"/>
+<circle cx="321.6" cy="253.1" r="2.2" style="--d:722ms"/>
+<circle cx="579.0" cy="285.1" r="1.6" style="--d:760ms"/>
+<circle cx="650.1" cy="179.3" r="1.9" style="--d:798ms"/>
+<circle cx="467.2" cy="229.5" r="1.6" style="--d:836ms"/>
+<circle cx="303.8" cy="324.7" r="2.2" style="--d:874ms"/>
+<circle cx="290.7" cy="161.2" r="1.6" style="--d:912ms"/>
+<circle cx="697.1" cy="316.2" r="2.6" style="--d:950ms"/>
+<circle cx="575.6" cy="372.8" r="1.6" style="--d:988ms"/>
+<circle cx="332.5" cy="362.1" r="2.2" style="--d:1026ms"/>
+<circle cx="576.8" cy="357.9" r="2.6" style="--d:1064ms"/>
+<circle cx="615.2" cy="327.5" r="2.2" style="--d:1102ms"/>
+<circle cx="612.8" cy="169.4" r="1.9" style="--d:1140ms"/>
+<circle cx="258.7" cy="168.1" r="1.6" style="--d:1178ms"/>
+<circle cx="297.0" cy="380.3" r="1.9" style="--d:1216ms"/>
+<circle cx="234.0" cy="396.6" r="1.6" style="--d:1254ms"/>
+<circle cx="775.3" cy="252.2" r="1.9" style="--d:1292ms"/>
+<circle cx="270.3" cy="281.5" r="2.2" style="--d:1330ms"/>
+<circle cx="626.9" cy="333.0" r="1.6" style="--d:1368ms"/>
+<circle cx="338.1" cy="353.8" r="1.9" style="--d:0ms"/>
+<circle cx="643.7" cy="431.8" r="1.9" style="--d:38ms"/>
+<circle cx="757.4" cy="284.8" r="2.2" style="--d:76ms"/>
+<circle cx="563.6" cy="342.5" r="2.2" style="--d:114ms"/>
+<circle cx="147.6" cy="213.6" r="1.9" style="--d:152ms"/>
+<circle cx="681.9" cy="242.6" r="2.2" style="--d:190ms"/>
+<circle cx="578.7" cy="177.8" r="2.6" style="--d:228ms"/>
+<circle cx="343.6" cy="325.2" r="1.9" style="--d:266ms"/>
+<circle cx="565.0" cy="370.5" r="2.2" style="--d:304ms"/>
+<circle cx="471.8" cy="194.9" r="2.2" style="--d:342ms"/>
+<circle cx="333.8" cy="377.2" r="1.6" style="--d:380ms"/>
+<circle cx="809.5" cy="241.2" r="2.2" style="--d:418ms"/>
+<circle cx="611.3" cy="141.7" r="1.6" style="--d:456ms"/>
+<circle cx="445.0" cy="216.4" r="1.6" style="--d:494ms"/>
+<circle cx="470.9" cy="338.2" r="1.6" style="--d:532ms"/>
+<circle cx="655.8" cy="280.9" r="1.9" style="--d:570ms"/>
+<circle cx="653.0" cy="279.9" r="2.6" style="--d:608ms"/>
+<circle cx="351.7" cy="116.4" r="1.9" style="--d:646ms"/>
+<circle cx="488.7" cy="254.0" r="2.6" style="--d:684ms"/>
+<circle cx="727.8" cy="248.5" r="1.6" style="--d:722ms"/>
+<circle cx="623.2" cy="232.2" r="2.6" style="--d:760ms"/>
+<circle cx="487.7" cy="401.8" r="2.6" style="--d:798ms"/>
+<circle cx="531.8" cy="389.8" r="2.6" style="--d:836ms"/>
+<circle cx="712.9" cy="155.0" r="2.2" style="--d:874ms"/>
+<circle cx="505.1" cy="212.4" r="1.9" style="--d:912ms"/>
+<circle cx="521.3" cy="138.0" r="1.9" style="--d:950ms"/>
+<circle cx="557.1" cy="294.8" r="2.2" style="--d:988ms"/>
+<circle cx="464.0" cy="222.5" r="1.9" style="--d:1026ms"/>
+<circle cx="450.1" cy="167.3" r="1.9" style="--d:1064ms"/>
+<circle cx="504.6" cy="139.9" r="2.6" style="--d:1102ms"/>
+<circle cx="309.1" cy="396.3" r="2.2" style="--d:1140ms"/>
+<circle cx="437.8" cy="265.2" r="1.6" style="--d:1178ms"/>
+<circle cx="174.4" cy="368.5" r="1.9" style="--d:1216ms"/>
+<circle cx="534.5" cy="344.8" r="1.6" style="--d:1254ms"/>
+<circle cx="672.1" cy="385.7" r="1.6" style="--d:1292ms"/>
+<circle cx="574.5" cy="74.7" r="2.2" style="--d:1330ms"/>
+<circle cx="644.8" cy="400.7" r="2.6" style="--d:1368ms"/>
+<circle cx="439.4" cy="251.1" r="1.9" style="--d:0ms"/>
+<circle cx="345.5" cy="338.9" r="1.6" style="--d:38ms"/>
+<circle cx="654.0" cy="270.1" r="1.6" style="--d:76ms"/>
+<circle cx="607.3" cy="243.9" r="2.6" style="--d:114ms"/>
+<circle cx="576.8" cy="229.0" r="2.2" style="--d:152ms"/>
+<circle cx="156.5" cy="331.5" r="1.9" style="--d:190ms"/>
+<circle cx="476.6" cy="318.8" r="2.2" style="--d:228ms"/>
+<circle cx="447.7" cy="371.3" r="1.6" style="--d:266ms"/>
+<circle cx="215.0" cy="181.7" r="2.6" style="--d:304ms"/>
+<circle cx="439.4" cy="359.5" r="1.9" style="--d:342ms"/>
+<circle cx="651.0" cy="189.6" r="1.9" style="--d:380ms"/>
+<circle cx="379.9" cy="310.7" r="2.2" style="--d:418ms"/>
+<circle cx="652.0" cy="183.6" r="2.6" style="--d:456ms"/>
+<circle cx="187.1" cy="339.0" r="1.6" style="--d:494ms"/>
+<circle cx="282.4" cy="241.3" r="2.2" style="--d:532ms"/>
+<circle cx="150.5" cy="235.4" r="2.2" style="--d:570ms"/>
+<circle cx="542.9" cy="374.6" r="2.2" style="--d:608ms"/>
+<circle cx="682.3" cy="263.2" r="2.2" style="--d:646ms"/>
+<circle cx="281.6" cy="275.6" r="1.9" style="--d:684ms"/>
+<circle cx="426.5" cy="177.7" r="1.6" style="--d:722ms"/>
+<circle cx="258.4" cy="247.8" r="2.2" style="--d:760ms"/>
+<circle cx="238.0" cy="217.5" r="1.9" style="--d:798ms"/>
+<circle cx="282.2" cy="223.1" r="2.2" style="--d:836ms"/>
+<circle cx="451.8" cy="367.3" r="1.9" style="--d:874ms"/>
+<circle cx="97.7" cy="250.6" r="1.6" style="--d:912ms"/>
+<circle cx="238.4" cy="212.3" r="2.2" style="--d:950ms"/>
+<circle cx="410.8" cy="268.1" r="2.6" style="--d:988ms"/>
+<circle cx="357.2" cy="216.3" r="1.6" style="--d:1026ms"/>
+<circle cx="374.6" cy="149.4" r="2.6" style="--d:1064ms"/>
+<circle cx="327.2" cy="280.9" r="2.2" style="--d:1102ms"/>
+<circle cx="635.4" cy="220.6" r="1.9" style="--d:1140ms"/>
+<circle cx="339.1" cy="74.8" r="1.9" style="--d:1178ms"/>
+<circle cx="444.9" cy="306.3" r="1.6" style="--d:1216ms"/>
+<circle cx="114.3" cy="187.3" r="1.6" style="--d:1254ms"/>
+<circle cx="556.9" cy="328.8" r="2.2" style="--d:1292ms"/>
+<circle cx="586.1" cy="332.0" r="1.6" style="--d:1330ms"/>
+<circle cx="463.4" cy="385.9" r="1.9" style="--d:1368ms"/>
+<circle cx="584.3" cy="296.7" r="2.6" style="--d:0ms"/>
+<circle cx="526.1" cy="228.3" r="1.6" style="--d:38ms"/>
+</g>
+    </svg>
+    <h1 id="title">An agency is a society.</h1>
+    <p class="lede">Notes on agents, agencies and societies, written while building a small organisation of machines and being the one person in it.</p>
+    <p class="whisper">Each note is one idea, read in order, after the way Marvin Minsky arranged his pages.</p>
+  </section>
 
-  <h2>Contact</h2>
-  <p>Questions or requests: <a href="mailto:kevin21kyu@gmail.com">kevin21kyu@gmail.com</a></p>
+  <main id="notes" class="leaves">
 
-  <footer>
-    <a href="/privacy.html">Privacy Policy</a> &middot; <a href="/terms.html">Terms of Service</a><br>
-    &copy; 2026 21K
+    <article class="leaf">
+      <div class="figure" aria-hidden="true">
+        <svg viewBox="0 0 112 112" fill="none" stroke="#141414" stroke-width="1">
+          <circle cx="56" cy="56" r="44" stroke-opacity=".18"/>
+          <g fill="#141414" stroke="none">
+            <circle cx="56" cy="14" r="2"/><circle cx="77" cy="19" r="2"/><circle cx="92" cy="35" r="2"/><circle cx="98" cy="56" r="2"/><circle cx="92" cy="77" r="2"/><circle cx="77" cy="93" r="2"/><circle cx="56" cy="98" r="2"/><circle cx="35" cy="93" r="2"/><circle cx="20" cy="77" r="2"/><circle cx="14" cy="56" r="2"/><circle cx="20" cy="35" r="2"/><circle cx="35" cy="19" r="2"/>
+            <circle cx="45" cy="40" r="1.6"/><circle cx="66" cy="38" r="1.6"/><circle cx="72" cy="60" r="1.6"/><circle cx="52" cy="70" r="1.6"/><circle cx="38" cy="58" r="1.6"/>
+          </g>
+        </svg>
+        <span class="n">1</span>
+      </div>
+      <div>
+        <h2>A mind is not one thing.</h2>
+        <p>In 1986 Marvin Minsky proposed, in <em>The Society of Mind</em>, that a mind is made of a great many small processes, each too simple to be called intelligent. He called them agents. What looks like thought is what happens when enough of them are arranged well. He had a word for a group of agents that together does something none of them can do alone: an agency.</p>
+        <p>The idea was offered as a theory of mind. Forty years on, it reads like a description of what is now, or will soon be, on everyone's desk.</p>
+      </div>
+    </article>
+
+    <article class="leaf">
+      <div class="figure" aria-hidden="true">
+        <svg viewBox="0 0 112 112" fill="none" stroke="#141414" stroke-width="1">
+<g stroke-opacity=".45">
+<line x1="32.9" y1="59.9" x2="13.2" y2="85.7"/>
+<line x1="32.9" y1="59.9" x2="34.8" y2="32.6"/>
+<line x1="32.9" y1="59.9" x2="46.8" y2="82.5"/>
+<line x1="32.9" y1="59.9" x2="52.5" y2="57.8"/>
+<line x1="32.9" y1="59.9" x2="13.8" y2="66.2"/>
+<line x1="67.1" y1="17.8" x2="38.5" y2="14.7"/>
+<line x1="67.1" y1="17.8" x2="89.3" y2="20.6"/>
+<line x1="67.1" y1="17.8" x2="67.1" y2="38.5"/>
+<line x1="13.2" y1="85.7" x2="46.8" y2="82.5"/>
+<line x1="13.2" y1="85.7" x2="13.8" y2="66.2"/>
+<line x1="34.8" y1="32.6" x2="38.5" y2="14.7"/>
+<line x1="34.8" y1="32.6" x2="14.0" y2="17.3"/>
+<line x1="99.6" y1="53.4" x2="78.7" y2="64.0"/>
+<line x1="99.6" y1="53.4" x2="89.3" y2="20.6"/>
+<line x1="99.6" y1="53.4" x2="83.0" y2="42.4"/>
+<line x1="67.9" y1="88.4" x2="78.7" y2="64.0"/>
+<line x1="67.9" y1="88.4" x2="46.8" y2="82.5"/>
+<line x1="67.9" y1="88.4" x2="87.4" y2="99.2"/>
+<line x1="67.9" y1="88.4" x2="56.5" y2="99.9"/>
+<line x1="78.7" y1="64.0" x2="87.4" y2="99.2"/>
+<line x1="78.7" y1="64.0" x2="83.0" y2="42.4"/>
+<line x1="38.5" y1="14.7" x2="14.0" y2="17.3"/>
+<line x1="46.8" y1="82.5" x2="56.5" y2="99.9"/>
+<line x1="46.8" y1="82.5" x2="52.5" y2="57.8"/>
+<line x1="46.8" y1="82.5" x2="13.8" y2="66.2"/>
+<line x1="89.3" y1="20.6" x2="67.1" y2="38.5"/>
+<line x1="89.3" y1="20.6" x2="83.0" y2="42.4"/>
+<line x1="67.1" y1="38.5" x2="52.5" y2="57.8"/>
+<line x1="67.1" y1="38.5" x2="83.0" y2="42.4"/>
+<line x1="87.4" y1="99.2" x2="56.5" y2="99.9"/>
+</g><g fill="#141414" stroke="none">
+<circle cx="32.9" cy="59.9" r="2.2"/>
+<circle cx="67.1" cy="17.8" r="2.2"/>
+<circle cx="13.2" cy="85.7" r="2.2"/>
+<circle cx="34.8" cy="32.6" r="2.2"/>
+<circle cx="99.6" cy="53.4" r="2.2"/>
+<circle cx="67.9" cy="88.4" r="2.2"/>
+<circle cx="78.7" cy="64.0" r="2.2"/>
+<circle cx="38.5" cy="14.7" r="2.2"/>
+<circle cx="46.8" cy="82.5" r="2.2"/>
+<circle cx="89.3" cy="20.6" r="2.2"/>
+<circle cx="67.1" cy="38.5" r="2.2"/>
+<circle cx="87.4" cy="99.2" r="2.2"/>
+<circle cx="56.5" cy="99.9" r="2.2"/>
+<circle cx="52.5" cy="57.8" r="2.2"/>
+<circle cx="13.8" cy="66.2" r="2.2"/>
+<circle cx="14.0" cy="17.3" r="2.2"/>
+<circle cx="83.0" cy="42.4" r="2.2"/>
+</g></svg>
+        <span class="n">2</span>
+      </div>
+      <div>
+        <h2>So we built one.</h2>
+        <p>21K is a small organisation of machines: about thirty agents in nine units, with leads, doers, controllers and a board. One plans the week. One routes what arrives. One keeps the library. One coaches the others to improve. One checks numbers against their sources. Two sit outside and watch, one as critic and one as keeper of the dream, and report only to the person who owns it.</p>
+        <p>None of them is clever. What they share is an operating model written down once: who may decide what, what must be recorded, who checks whom, and what nobody is allowed to do. The intelligence, such as it is, lives in the arrangement.</p>
+      </div>
+    </article>
+
+    <article class="leaf">
+      <div class="figure" aria-hidden="true">
+        <svg viewBox="0 0 112 112" fill="none" stroke="#141414" stroke-width="1">
+          <circle cx="22" cy="56" r="6"/>
+          <circle cx="90" cy="56" r="6"/>
+          <rect x="46" y="42" width="20" height="28" stroke-opacity=".9"/>
+          <path d="M28 56h18M66 56h18" stroke-opacity=".6"/>
+          <path d="M50 50h12M50 56h12M50 62h8" stroke-opacity=".4"/>
+        </svg>
+        <span class="n">3</span>
+      </div>
+      <div>
+        <h2>Not arguing over a prompt.</h2>
+        <p>Most people meet these machines in a chat box, and most of the time there is spent persuading. Say it again, say it differently, remind it of what it forgot. It is tiring, and nothing of it survives the conversation. It is also a trap of a familiar kind: a settled arrangement in which neither side can do better by changing its own move, and both are worse off than they could be. The person keeps prompting because the machine keeps forgetting; the machine keeps guessing because the person keeps improvising. Nobody moves first, so nobody gets out.</p>
+        <p>The alternative is older than computers. Write the rules once, in a shared record that both sides read and neither side owns. Let the record, not the conversation, be the memory. This changes the positions. The interaction is no longer one prompt at a time but over months, with the same rules on both sides, and what each side learns is kept. The relationship stops being an argument and becomes a partnership.</p>
+      </div>
+    </article>
+
+    <article class="leaf">
+      <div class="figure" aria-hidden="true">
+        <svg viewBox="0 0 112 112" fill="none" stroke="#141414" stroke-width="1">
+<g stroke-opacity=".4">
+<line x1="96.8" y1="99.1" x2="83.2" y2="64.6"/>
+<line x1="96.8" y1="99.1" x2="83.2" y2="75.9"/>
+<line x1="96.8" y1="99.1" x2="60.4" y2="96.2"/>
+<line x1="96.8" y1="99.1" x2="74.0" y2="101.5"/>
+<line x1="93.7" y1="16.0" x2="58.9" y2="20.5"/>
+<line x1="93.7" y1="16.0" x2="101.2" y2="42.8"/>
+<line x1="93.7" y1="16.0" x2="69.7" y2="25.5"/>
+<line x1="93.7" y1="16.0" x2="86.3" y2="26.8"/>
+<line x1="58.9" y1="20.5" x2="42.5" y2="13.5"/>
+<line x1="58.9" y1="20.5" x2="69.7" y2="25.5"/>
+<line x1="58.9" y1="20.5" x2="86.3" y2="26.8"/>
+<line x1="58.9" y1="20.5" x2="39.8" y2="43.5"/>
+<line x1="26.4" y1="50.7" x2="25.1" y2="39.0"/>
+<line x1="26.4" y1="50.7" x2="11.7" y2="34.5"/>
+<line x1="26.4" y1="50.7" x2="39.8" y2="43.5"/>
+<line x1="26.4" y1="50.7" x2="13.4" y2="48.0"/>
+<line x1="26.4" y1="50.7" x2="10.2" y2="85.7"/>
+<line x1="10.4" y1="16.2" x2="42.5" y2="13.5"/>
+<line x1="10.4" y1="16.2" x2="25.1" y2="39.0"/>
+<line x1="10.4" y1="16.2" x2="11.7" y2="34.5"/>
+<line x1="10.4" y1="16.2" x2="13.4" y2="48.0"/>
+<line x1="76.2" y1="48.4" x2="83.2" y2="64.6"/>
+<line x1="76.2" y1="48.4" x2="71.2" y2="67.6"/>
+<line x1="76.2" y1="48.4" x2="101.2" y2="42.8"/>
+<line x1="76.2" y1="48.4" x2="69.7" y2="25.5"/>
+<line x1="76.2" y1="48.4" x2="86.3" y2="26.8"/>
+<line x1="57.2" y1="78.5" x2="71.2" y2="67.6"/>
+<line x1="57.2" y1="78.5" x2="83.2" y2="75.9"/>
+<line x1="57.2" y1="78.5" x2="60.4" y2="96.2"/>
+<line x1="57.2" y1="78.5" x2="24.1" y2="101.6"/>
+<line x1="57.2" y1="78.5" x2="10.2" y2="85.7"/>
+<line x1="57.2" y1="78.5" x2="74.0" y2="101.5"/>
+<line x1="42.5" y1="13.5" x2="69.7" y2="25.5"/>
+<line x1="42.5" y1="13.5" x2="25.1" y2="39.0"/>
+<line x1="42.5" y1="13.5" x2="39.8" y2="43.5"/>
+<line x1="83.2" y1="64.6" x2="71.2" y2="67.6"/>
+<line x1="83.2" y1="64.6" x2="101.2" y2="42.8"/>
+<line x1="83.2" y1="64.6" x2="83.2" y2="75.9"/>
+<line x1="71.2" y1="67.6" x2="83.2" y2="75.9"/>
+<line x1="71.2" y1="67.6" x2="60.4" y2="96.2"/>
+<line x1="101.2" y1="42.8" x2="86.3" y2="26.8"/>
+<line x1="69.7" y1="25.5" x2="86.3" y2="26.8"/>
+<line x1="25.1" y1="39.0" x2="11.7" y2="34.5"/>
+<line x1="25.1" y1="39.0" x2="39.8" y2="43.5"/>
+<line x1="25.1" y1="39.0" x2="13.4" y2="48.0"/>
+<line x1="11.7" y1="34.5" x2="39.8" y2="43.5"/>
+<line x1="11.7" y1="34.5" x2="13.4" y2="48.0"/>
+<line x1="39.8" y1="43.5" x2="13.4" y2="48.0"/>
+<line x1="83.2" y1="75.9" x2="60.4" y2="96.2"/>
+<line x1="83.2" y1="75.9" x2="74.0" y2="101.5"/>
+<line x1="60.4" y1="96.2" x2="24.1" y2="101.6"/>
+<line x1="60.4" y1="96.2" x2="74.0" y2="101.5"/>
+<line x1="24.1" y1="101.6" x2="10.2" y2="85.7"/>
+<line x1="13.4" y1="48.0" x2="10.2" y2="85.7"/>
+</g><g stroke-opacity=".4">
+<line x1="71.2" y1="67.6" x2="56" y2="56"/>
+<line x1="39.8" y1="43.5" x2="56" y2="56"/>
+<line x1="76.2" y1="48.4" x2="56" y2="56"/>
+<line x1="57.2" y1="78.5" x2="56" y2="56"/>
+<line x1="83.2" y1="64.6" x2="56" y2="56"/>
+<line x1="26.4" y1="50.7" x2="56" y2="56"/>
+</g><g fill="#141414" stroke="none">
+<circle cx="96.8" cy="99.1" r="2"/>
+<circle cx="93.7" cy="16.0" r="2"/>
+<circle cx="58.9" cy="20.5" r="2"/>
+<circle cx="26.4" cy="50.7" r="2"/>
+<circle cx="10.4" cy="16.2" r="2"/>
+<circle cx="76.2" cy="48.4" r="2"/>
+<circle cx="57.2" cy="78.5" r="2"/>
+<circle cx="42.5" cy="13.5" r="2"/>
+<circle cx="83.2" cy="64.6" r="2"/>
+<circle cx="71.2" cy="67.6" r="2"/>
+<circle cx="101.2" cy="42.8" r="2"/>
+<circle cx="69.7" cy="25.5" r="2"/>
+<circle cx="25.1" cy="39.0" r="2"/>
+<circle cx="86.3" cy="26.8" r="2"/>
+<circle cx="11.7" cy="34.5" r="2"/>
+<circle cx="39.8" cy="43.5" r="2"/>
+<circle cx="83.2" cy="75.9" r="2"/>
+<circle cx="60.4" cy="96.2" r="2"/>
+<circle cx="24.1" cy="101.6" r="2"/>
+<circle cx="13.4" cy="48.0" r="2"/>
+<circle cx="10.2" cy="85.7" r="2"/>
+<circle cx="74.0" cy="101.5" r="2"/>
+</g><path d="M0,-0.32 C0,-0.68 -0.56,-0.68 -0.56,-0.2 C-0.56,0.16 -0.22,0.36 0,0.62 C0.22,0.36 0.56,0.16 0.56,-0.2 C0.56,-0.68 0,-0.68 0,-0.32 Z" transform="translate(56 56) scale(10)" fill="#ffffff" stroke="#141414" stroke-width="1" vector-effect="non-scaling-stroke"/></svg>
+        <span class="n">4</span>
+      </div>
+      <div>
+        <h2>The human.</h2>
+        <p>In a society of agents the person does not disappear. The person becomes rarer, and what is left for them becomes clearer and higher: the cornerstone, the one piece everything else is arranged around. In ours, the human's part is to imagine, to orchestrate and to decide.</p>
+        <p>Everything else is asked, not told. A question arrives with its context, the options, a recommendation and a deadline. The answer goes back into the record. The person stands where the society touches the world, the point through which intention goes in and consequence comes back. Done well, it is the rare situation where both sides win more together than either could alone: the machines run at the full extent of what they can do, and the person is freed to reach for the highest of what a person can be. The Greeks had a word for that, <em>arete</em>: not virtue in the moral sense, but excellence: achieving our highest human potential. It is a strange gift of these machines that, by taking the rest, they leave us with exactly that.</p>
+      </div>
+    </article>
+
+    <article class="leaf">
+      <div class="figure" aria-hidden="true">
+        <svg viewBox="0 0 112 112" fill="none" stroke="#141414" stroke-width="1">
+          <path d="M56 12a44 44 0 1 1-31.1 12.9" />
+          <circle cx="30" cy="20" r="1.6" fill="#141414" stroke="none" fill-opacity=".5"/>
+        </svg>
+        <span class="n">5</span>
+      </div>
+      <div>
+        <h2>Trust.</h2>
+        <p>Three of our rules do more work than the rest. A job that did not report is an alert, not a success. When an agent does not know, it says so and asks; it never fills the gap with a plausible guess or a sloppy, confident reply. And our agents hold opinions and defend them. Unlike the chatbot that folds at the first sign of disagreement, an agent here keeps its view until it is shown a better one, and says why.</p>
+        <p>The rules are hard to keep, because the machines are fluent and fluency feels like knowledge. Much of building the agency has been learning to make them show the edge of what they know, and to stand their ground inside it. Oddly, it is the same thing we ask of people we trust.</p>
+      </div>
+    </article>
+
+    <article class="leaf">
+      <div class="figure" aria-hidden="true">
+        <svg viewBox="0 0 112 112" fill="none" stroke="#141414" stroke-width="1">
+          <g fill="#141414" stroke="none">
+            <circle cx="22" cy="26" r="1.8"/><circle cx="30" cy="20" r="1.8"/><circle cx="28" cy="32" r="1.8"/><circle cx="36" cy="28" r="1.8"/>
+            <circle cx="74" cy="22" r="1.8"/><circle cx="82" cy="28" r="1.8"/><circle cx="78" cy="34" r="1.8"/>
+            <circle cx="52" cy="58" r="1.8"/><circle cx="60" cy="54" r="1.8"/><circle cx="58" cy="64" r="1.8"/><circle cx="48" cy="66" r="1.8"/><circle cx="64" cy="62" r="1.8"/>
+            <circle cx="20" cy="84" r="1.8"/><circle cx="26" cy="92" r="1.8"/><circle cx="32" cy="84" r="1.8"/>
+            <circle cx="86" cy="80" r="1.8"/><circle cx="92" cy="88" r="1.8"/><circle cx="82" cy="92" r="1.8"/><circle cx="90" cy="96" r="1.8"/>
+          </g>
+          <path d="M34 30L50 58M78 30L62 56M30 84L50 66M84 82L64 64" stroke-opacity=".25"/>
+        </svg>
+        <span class="n">6</span>
+      </div>
+      <div>
+        <h2>Many small societies.</h2>
+        <p>For most of history, organising more than a few people needed a firm, a state or a religion: a shared story large enough to hold strangers together, and behind the story, force. Every society we have built held itself together with some mix of the two: a belief, and the threat of punishment, shame, exclusion or collective violence for those who stepped outside it, with reward for those who stayed in. We rarely say so, but that is what an institution has been.</p>
+        <p>The shape of our institutions has always followed the cost of coordination. When getting many hands to move together was expensive, we built big, and accepted the hierarchy, the paperwork, the slowness and the coercion that came with size. When coordination becomes cheap, and can be written down and run by machines, there is no longer a reason to build big. We will build many and small, each the length of one person's attention, each with a person at its centre, and held together not by fear but by what is written.</p>
+        <p>Whether a world of a billion small institutions is better or worse than a world of a few large ones is not decided by the technology. It is decided by what each of them is allowed to do alone, and by who answers for them.</p>
+      </div>
+    </article>
+
+    <article class="leaf">
+      <div class="figure" aria-hidden="true">
+        <svg viewBox="0 0 112 112" fill="none" stroke="#141414" stroke-width="1">
+<circle cx="56" cy="56" r="48" stroke-opacity=".14"/>
+<circle cx="56" cy="56" r="24" stroke-opacity=".14"/>
+<g fill="#141414" stroke="none">
+<circle cx="104.0" cy="56.0" r="1.9"/>
+<circle cx="100.3" cy="74.4" r="1.9"/>
+<circle cx="89.9" cy="89.9" r="1.9"/>
+<circle cx="74.4" cy="100.3" r="1.9"/>
+<circle cx="56.0" cy="104.0" r="1.9"/>
+<circle cx="37.6" cy="100.3" r="1.9"/>
+<circle cx="22.1" cy="89.9" r="1.9"/>
+<circle cx="11.7" cy="74.4" r="1.9"/>
+<circle cx="8.0" cy="56.0" r="1.9"/>
+<circle cx="11.7" cy="37.6" r="1.9"/>
+<circle cx="22.1" cy="22.1" r="1.9"/>
+<circle cx="37.6" cy="11.7" r="1.9"/>
+<circle cx="56.0" cy="8.0" r="1.9"/>
+<circle cx="74.4" cy="11.7" r="1.9"/>
+<circle cx="89.9" cy="22.1" r="1.9"/>
+<circle cx="100.3" cy="37.6" r="1.9"/>
+<circle cx="79.5" cy="60.8" r="1.7"/>
+<circle cx="69.3" cy="76.0" r="1.7"/>
+<circle cx="51.2" cy="79.5" r="1.7"/>
+<circle cx="36.0" cy="69.3" r="1.7"/>
+<circle cx="32.5" cy="51.2" r="1.7"/>
+<circle cx="42.7" cy="36.0" r="1.7"/>
+<circle cx="60.8" cy="32.5" r="1.7"/>
+<circle cx="76.0" cy="42.7" r="1.7"/>
+<circle cx="56" cy="56" r="1.5"/></g></svg>
+        <span class="n">7</span>
+      </div>
+      <div>
+        <h2>A society inside a society.</h2>
+        <p>There is a loop in all this worth sitting with. Minsky's claim was that each of us is already a society: a mind made of agents that do not know they are part of a mind. Now one such society builds another, smaller and slower, out of machines, and gives it rules, a memory and a place where a person answers.</p>
+        <p>The thing being built is a picture of the builder. If Minsky was right, we are not inventing something new. We are doing again, on the outside, what was done once on the inside, and this time we can read the rules as we write them. What that will make of us, I do not know yet. It is one reason to write it down.</p>
+      </div>
+    </article>
+
+  </main>
+
+  <section id="questions" class="invite" aria-labelledby="qtitle">
+    <h2 id="qtitle">Some questions to keep.</h2>
+    <ol>
+      <li>When a machine says it does not know, do you trust it more, or less, than when it answers?</li>
+      <li>A society of machines runs on what is written. What in your organisation, or your life, still lives only in someone's head?</li>
+      <li>Which decisions would you refuse to hand over to any society of agents, and what does the list say about you?</li>
+      <li>Will the first generation to grow up among societies of machines feel more free?</li>
+    </ol>
+    <p class="after">There is no form to fill in and nothing to buy. If one of these questions stays with you, that is the whole intent. You can write to me; this page is meant to find the people thinking about the same things. I am learning by thinking and building at the same time, so I make a lot of mistakes, and I would rather hear about them than not.</p>
+  </section>
+
+  <footer id="about">
+    <span><svg class="seal" viewBox="-0.7 -0.8 1.4 1.5" aria-hidden="true"><path d="M0,-0.32 C0,-0.68 -0.56,-0.68 -0.56,-0.2 C-0.56,0.16 -0.22,0.36 0,0.62 C0.22,0.36 0.56,0.16 0.56,-0.2 C0.56,-0.68 0,-0.68 0,-0.32 Z" fill="#d23f2a"/></svg>21K is a small agency of agents, built and run by one person.</span>
+    <a href="mailto:kevin21kyu@gmail.com">Write to the person</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <span>&copy; 2026 21K</span>
   </footer>
+
+</div>
 </body>
 </html>
