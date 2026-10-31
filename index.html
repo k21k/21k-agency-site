@@ -799,83 +799,107 @@
 
 <script>
 (function () {
-  // The connection game: one dot wakes up and reaches out to 1 to 5 others at once,
-  // near, far or both. Each dot a connection reaches wakes up in turn and reaches out.
-  // Any dot can receive any number of connections. After 4 seconds the pattern freezes,
-  // holds for 1 second, and a new game starts from another dot.
+  // The connection game. Connect (3.5 s): one dot wakes and reaches out to 1 to 3 others at once,
+  // near, far or both; every dot a line reaches wakes in turn; any dot can receive any number of
+  // lines. Freeze (1 s): the pattern holds. Reset (2 s): the lines go, the dots wander to new
+  // places, and a new game starts from another dot.
   var svg = document.querySelector('svg.field');
   if (!svg || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var NS = 'http://www.w3.org/2000/svg';
   var dots = Array.prototype.slice.call(svg.querySelectorAll('.field-dots circle'));
   if (dots.length < 10) return;
+  var W = 900, H = 520, CX = W / 2, CY = H / 2;
+  var CONNECT = 3500, FREEZE = 1000, RESET = 2000, CLEAR = 300, SPEED = 260;
   var pts = dots.map(function (c) { return [parseFloat(c.getAttribute('cx')), parseFloat(c.getAttribute('cy'))]; });
-  var n = pts.length, PLAY = 4000, HOLD = 1000, FADE = 350, SPEED = 260; // speed in drawing units per second
-  var near = pts.map(function (p, i) {
-    return pts.map(function (q, j) { return [Math.hypot(p[0] - q[0], p[1] - q[1]), j]; })
-      .filter(function (d) { return d[1] !== i; })
-      .sort(function (a, b) { return a[0] - b[0]; })
-      .slice(0, 10).map(function (d) { return d[1]; });
-  });
+  var n = pts.length, near, growing, woken, frame, timer;
   var staticLines = svg.querySelector('.field-lines');
   var layer = document.createElementNS(NS, 'g');
   layer.setAttribute('stroke', '#141414'); layer.setAttribute('stroke-opacity', '0.22');
   layer.setAttribute('stroke-width', '0.8'); layer.setAttribute('fill', 'none');
   svg.insertBefore(layer, svg.firstChild);
-  var growing = [], woken, t0, frame;
 
+  function computeNear() {
+    near = pts.map(function (p, i) {
+      return pts.map(function (q, j) { return [Math.hypot(p[0] - q[0], p[1] - q[1]), j]; })
+        .filter(function (d) { return d[1] !== i; })
+        .sort(function (a, b) { return a[0] - b[0]; })
+        .slice(0, 10).map(function (d) { return d[1]; });
+    });
+  }
+  function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function wander(p) {
+    for (var k = 0; k < 10; k++) {
+      var x = p[0] + gauss() * 45, y = p[1] + gauss() * 28;
+      var r = Math.hypot((x - CX) / 1.45, (y - CY) / 0.8);
+      if (x > 20 && x < W - 20 && y > 16 && y < H - 16 && r < 300) return [x, y];
+    }
+    return p;
+  }
   function pickTarget(i) {
-    // half the time a close neighbour, half the time anywhere on the field
     if (Math.random() < 0.5) return near[i][Math.floor(Math.random() * near[i].length)];
     var j; do { j = Math.floor(Math.random() * n); } while (j === i);
     return j;
   }
   function wake(i, at) {
     woken[i] = true;
-    var k = 1 + Math.floor(Math.random() * 5);
+    var k = 1 + Math.floor(Math.random() * 3);
     for (var m = 0; m < k; m++) {
-      var j = pickTarget(i);
-      var l = document.createElementNS(NS, 'line');
-      l.setAttribute('x1', pts[i][0]); l.setAttribute('y1', pts[i][1]);
-      l.setAttribute('x2', pts[i][0]); l.setAttribute('y2', pts[i][1]);
+      var j = pickTarget(i), l = document.createElementNS(NS, 'line');
+      l.setAttribute('x1', pts[i][0].toFixed(1)); l.setAttribute('y1', pts[i][1].toFixed(1));
+      l.setAttribute('x2', pts[i][0].toFixed(1)); l.setAttribute('y2', pts[i][1].toFixed(1));
       layer.appendChild(l);
       var len = Math.hypot(pts[j][0] - pts[i][0], pts[j][1] - pts[i][1]);
-      growing.push({ el: l, from: i, to: j, start: at, dur: 1000 * len / SPEED });
+      growing.push({ el: l, from: i, to: j, start: at, dur: Math.max(1, 1000 * len / SPEED) });
     }
   }
-  function step(now) {
-    var elapsed = now - t0;
-    if (elapsed >= PLAY) { setTimeout(restart, HOLD); return; }   // freeze where it stands
-    var still = [], lenBefore = growing.length;
-    for (var g = 0; g < lenBefore; g++) {
-      var s = growing[g], f = Math.min(1, (now - s.start) / s.dur), a = pts[s.from], b = pts[s.to];
-      s.el.setAttribute('x2', (a[0] + (b[0] - a[0]) * f).toFixed(1));
-      s.el.setAttribute('y2', (a[1] + (b[1] - a[1]) * f).toFixed(1));
-      if (f < 1) still.push(s);
-      else if (!woken[s.to]) wake(s.to, now);
-    }
-    growing = still.concat(growing.slice(lenBefore));
-    frame = requestAnimationFrame(step);
-  }
-  function begin() {
+
+  // Connect
+  function connect() {
     while (layer.firstChild) layer.removeChild(layer.firstChild);
     layer.style.transition = 'none'; layer.style.opacity = '1';
-    growing = []; woken = new Array(n);
-    t0 = performance.now();
+    computeNear(); growing = []; woken = new Array(n);
+    var t0 = performance.now();
     wake(Math.floor(Math.random() * n), t0);
+    function step(now) {
+      if (now - t0 >= CONNECT) { timer = setTimeout(reset, FREEZE); return; } // freeze where it stands
+      var still = [], before = growing.length;
+      for (var g = 0; g < before; g++) {
+        var s = growing[g], f = Math.min(1, (now - s.start) / s.dur), a = pts[s.from], b = pts[s.to];
+        s.el.setAttribute('x2', (a[0] + (b[0] - a[0]) * f).toFixed(1));
+        s.el.setAttribute('y2', (a[1] + (b[1] - a[1]) * f).toFixed(1));
+        if (f < 1) still.push(s); else if (!woken[s.to]) wake(s.to, now);
+      }
+      growing = still.concat(growing.slice(before));
+      frame = requestAnimationFrame(step);
+    }
     frame = requestAnimationFrame(step);
   }
-  function restart() {
-    layer.style.transition = 'opacity ' + FADE + 'ms ease'; layer.style.opacity = '0';
-    setTimeout(begin, FADE);
+
+  // Reset: lines go in the first 0.3 s; the dots wander for the full 2 s
+  function reset() {
+    layer.style.transition = 'opacity ' + CLEAR + 'ms ease'; layer.style.opacity = '0';
+    var from = pts.map(function (p) { return p.slice(); }), to = pts.map(wander), t0 = performance.now();
+    function ease(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+    function step(now) {
+      var f = Math.min(1, (now - t0) / RESET), e = ease(f);
+      for (var i = 0; i < n; i++) {
+        pts[i] = [from[i][0] + (to[i][0] - from[i][0]) * e, from[i][1] + (to[i][1] - from[i][1]) * e];
+        dots[i].setAttribute('cx', pts[i][0].toFixed(1)); dots[i].setAttribute('cy', pts[i][1].toFixed(1));
+      }
+      if (f >= CLEAR / RESET && layer.firstChild) while (layer.firstChild) layer.removeChild(layer.firstChild);
+      if (f < 1) frame = requestAnimationFrame(step); else connect();
+    }
+    frame = requestAnimationFrame(step);
   }
-  function first() {
-    if (staticLines) { staticLines.style.transition = 'opacity 0.6s ease'; staticLines.style.opacity = '0'; }
-    setTimeout(begin, 600);
-  }
+
+  function stop() { cancelAnimationFrame(frame); clearTimeout(timer); }
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { cancelAnimationFrame(frame); } else if (woken) { begin(); }
+    if (document.hidden) stop(); else if (woken) { stop(); reset(); }
   });
-  setTimeout(first, 2600);
+  setTimeout(function () {
+    if (staticLines) { staticLines.style.transition = 'opacity 0.6s ease'; staticLines.style.opacity = '0'; }
+    timer = setTimeout(connect, 600);
+  }, 2600);
 })();
 </script>
 </body>
