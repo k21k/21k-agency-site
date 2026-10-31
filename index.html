@@ -799,61 +799,83 @@
 
 <script>
 (function () {
-  // The field reorganises itself every five seconds: the dots drift to new places,
-  // the links fade out and are redrawn between the new neighbours.
+  // The connection game: one dot wakes up and reaches out to 1 to 5 others at once,
+  // near, far or both. Each dot a connection reaches wakes up in turn and reaches out.
+  // Any dot can receive any number of connections. After 4 seconds the pattern freezes,
+  // holds for 1 second, and a new game starts from another dot.
   var svg = document.querySelector('svg.field');
   if (!svg || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var NS = 'http://www.w3.org/2000/svg';
   var dots = Array.prototype.slice.call(svg.querySelectorAll('.field-dots circle'));
   if (dots.length < 10) return;
-  var W = 900, H = 520, cx = W / 2, cy = H / 2, MOVE = 2200, STEP = 5000, started = false;
   var pts = dots.map(function (c) { return [parseFloat(c.getAttribute('cx')), parseFloat(c.getAttribute('cy'))]; });
-  var links = svg.querySelector('.field-lines');
-  function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
-  function drift(p) {
-    for (var k = 0; k < 8; k++) {
-      var x = p[0] + gauss() * 34, y = p[1] + gauss() * 22;
-      var r = Math.hypot((x - cx) / 1.45, (y - cy) / 0.8);
-      if (x > 20 && x < W - 20 && y > 16 && y < H - 16 && r > 70 && r < 300) return [x, y];
+  var n = pts.length, PLAY = 4000, HOLD = 1000, FADE = 350, SPEED = 260; // speed in drawing units per second
+  var near = pts.map(function (p, i) {
+    return pts.map(function (q, j) { return [Math.hypot(p[0] - q[0], p[1] - q[1]), j]; })
+      .filter(function (d) { return d[1] !== i; })
+      .sort(function (a, b) { return a[0] - b[0]; })
+      .slice(0, 10).map(function (d) { return d[1]; });
+  });
+  var staticLines = svg.querySelector('.field-lines');
+  var layer = document.createElementNS(NS, 'g');
+  layer.setAttribute('stroke', '#141414'); layer.setAttribute('stroke-opacity', '0.22');
+  layer.setAttribute('stroke-width', '0.8'); layer.setAttribute('fill', 'none');
+  svg.insertBefore(layer, svg.firstChild);
+  var growing = [], woken, t0, frame;
+
+  function pickTarget(i) {
+    // half the time a close neighbour, half the time anywhere on the field
+    if (Math.random() < 0.5) return near[i][Math.floor(Math.random() * near[i].length)];
+    var j; do { j = Math.floor(Math.random() * n); } while (j === i);
+    return j;
+  }
+  function wake(i, at) {
+    woken[i] = true;
+    var k = 1 + Math.floor(Math.random() * 5);
+    for (var m = 0; m < k; m++) {
+      var j = pickTarget(i);
+      var l = document.createElementNS(NS, 'line');
+      l.setAttribute('x1', pts[i][0]); l.setAttribute('y1', pts[i][1]);
+      l.setAttribute('x2', pts[i][0]); l.setAttribute('y2', pts[i][1]);
+      layer.appendChild(l);
+      var len = Math.hypot(pts[j][0] - pts[i][0], pts[j][1] - pts[i][1]);
+      growing.push({ el: l, from: i, to: j, start: at, dur: 1000 * len / SPEED });
     }
-    return p;
   }
-  function drawLinks(ps) {
-    var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.setAttribute('stroke', '#141414'); g.setAttribute('stroke-opacity', '0.26');
-    g.setAttribute('stroke-width', '0.8'); g.setAttribute('fill', 'none');
-    g.style.opacity = '0'; g.style.transition = 'opacity 1.2s ease';
-    var seen = {};
-    for (var i = 0; i < ps.length; i++) {
-      var near = [];
-      for (var j = 0; j < ps.length; j++) if (j !== i) near.push([Math.hypot(ps[i][0] - ps[j][0], ps[i][1] - ps[j][1]), j]);
-      near.sort(function (a, b) { return a[0] - b[0]; });
-      for (var k = 0; k < 3 && k < near.length; k++) {
-        if (near[k][0] >= 62) break;
-        var j2 = near[k][1], key = i < j2 ? i + '-' + j2 : j2 + '-' + i;
-        if (seen[key]) continue; seen[key] = 1;
-        var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        l.setAttribute('x1', ps[i][0].toFixed(1)); l.setAttribute('y1', ps[i][1].toFixed(1));
-        l.setAttribute('x2', ps[j2][0].toFixed(1)); l.setAttribute('y2', ps[j2][1].toFixed(1));
-        g.appendChild(l);
-      }
+  function step(now) {
+    var elapsed = now - t0;
+    if (elapsed >= PLAY) { setTimeout(restart, HOLD); return; }   // freeze where it stands
+    var still = [], lenBefore = growing.length;
+    for (var g = 0; g < lenBefore; g++) {
+      var s = growing[g], f = Math.min(1, (now - s.start) / s.dur), a = pts[s.from], b = pts[s.to];
+      s.el.setAttribute('x2', (a[0] + (b[0] - a[0]) * f).toFixed(1));
+      s.el.setAttribute('y2', (a[1] + (b[1] - a[1]) * f).toFixed(1));
+      if (f < 1) still.push(s);
+      else if (!woken[s.to]) wake(s.to, now);
     }
-    svg.insertBefore(g, svg.firstChild);
-    return g;
+    growing = still.concat(growing.slice(lenBefore));
+    frame = requestAnimationFrame(step);
   }
-  function tick() {
-    if (document.hidden) return;
-    if (!started) { started = true; dots.forEach(function (c) { c.style.transition = 'cx ' + MOVE + 'ms ease-in-out, cy ' + MOVE + 'ms ease-in-out'; }); }
-    var old = links;
-    old.style.transition = 'opacity 0.8s ease'; old.style.opacity = '0';
-    pts = pts.map(drift);
-    dots.forEach(function (c, i) { c.setAttribute('cx', pts[i][0].toFixed(1)); c.setAttribute('cy', pts[i][1].toFixed(1)); });
-    setTimeout(function () {
-      if (old.parentNode) old.parentNode.removeChild(old);
-      links = drawLinks(pts);
-      requestAnimationFrame(function () { requestAnimationFrame(function () { links.style.opacity = '1'; }); });
-    }, MOVE);
+  function begin() {
+    while (layer.firstChild) layer.removeChild(layer.firstChild);
+    layer.style.transition = 'none'; layer.style.opacity = '1';
+    growing = []; woken = new Array(n);
+    t0 = performance.now();
+    wake(Math.floor(Math.random() * n), t0);
+    frame = requestAnimationFrame(step);
   }
-  setTimeout(function () { tick(); setInterval(tick, STEP); }, 4500);
+  function restart() {
+    layer.style.transition = 'opacity ' + FADE + 'ms ease'; layer.style.opacity = '0';
+    setTimeout(begin, FADE);
+  }
+  function first() {
+    if (staticLines) { staticLines.style.transition = 'opacity 0.6s ease'; staticLines.style.opacity = '0'; }
+    setTimeout(begin, 600);
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { cancelAnimationFrame(frame); } else if (woken) { begin(); }
+  });
+  setTimeout(first, 2600);
 })();
 </script>
 </body>
